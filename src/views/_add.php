@@ -2,13 +2,19 @@
 	<div class="form-group">
 		<div class="col-md-12">
 			<label>Клиент</label>
-			<input type="text" name="client" class="form-control" required value="<?php echo value($this->item, 'client'); ?>" />
+			<textarea name="client" class="form-control" required><?php echo value($this->item, 'client'); ?></textarea>
 		</div>
 	</div>
 	<div class="form-group">
 		<div class="col-md-12">
 			<label>Град</label>
 			<select name="cityId" class="form-control" required><?php echo build_options(db()->fetchPairs('SELECT id, name FROM cities'), value($this->item, 'cityId', 0), 'Изберете'); ?></select>
+		</div>
+	</div>
+	<div class="form-group">
+		<div class="col-md-12">
+			<label>Адрес</label>
+			<textarea name="address" class="form-control" required><?php echo value($this->item, 'address'); ?></textarea>
 		</div>
 	</div>
 	<div class="form-group">

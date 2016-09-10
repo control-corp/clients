@@ -36,6 +36,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         db()->update('clients', array(
                             'client'  => $post['client'],
                             'cityId'  => $post['cityId'],
+                            'address' => $post['address'],
                             'email'   => $post['email'],
                             'phone'   => $post['phone'],
                             'theme'   => ($post['theme'] ? $post['theme'] : null),
@@ -79,6 +80,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     db()->insert('clients', array(
                         'client'  => $post['client'],
                         'cityId'  => $post['cityId'],
+                        'address' => $post['address'],
                         'email'   => $post['email'],
                         'phone'   => $post['phone'],
                         'theme'   => ($post['theme'] ? $post['theme'] : null),

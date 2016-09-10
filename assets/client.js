@@ -38,9 +38,10 @@ function addMarker(params)
 			icons += '<option' + (i == this.data.icon ? ' selected' : '') + ' value="' + i + '">' + iconUrls[i] + '</option>';
 		}
 		icons += '</select>';
-		var content = '<div style="width: 300px"><table class="table table-bordered">' +
-			'<tr><th style="width: 30%">Клиент</th><td>' + this.data.client + '</td></tr>' +
+		var content = '<div style="width: 300px"><table class="client table table-bordered">' +
+			'<tr><th style="width: 30%">Клиент</th><td>' + nl2br(this.data.client) + '</td></tr>' +
 			'<tr><th>Град</th><td>' + this.data.city + '</td></tr>' +
+			'<tr><th>Адрес</th><td>' + (this.data.address ? nl2br(this.data.address) : '') + '</td></tr>' +
 			'<tr><th>Email</th><td>' + this.data.email + '</td></tr>' +
 			'<tr><th>Телефон</th><td>' + this.data.phone + '</td></tr>' +
 			'<tr><th>Тема</th><td>' + (this.data.theme ? this.data.theme : '') + '</td></tr>' +

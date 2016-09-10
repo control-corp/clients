@@ -18,3 +18,7 @@ body {
 .clientItem:last-child {
 	margin-bottom: 0;
 }
+.client tr th,
+.client tr td {
+	padding: 2px 5px !important;
+}

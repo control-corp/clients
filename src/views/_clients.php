@@ -1,8 +1,9 @@
 <?php foreach ($this->clients as $client) : ?>
 <div class="table-responsive clientItem">
 	<table class="table table-bordered">
-		<tr><th style="width: 150px;">Клиент <img src="<?php echo $client['icon']; ?>"></th><td><?php echo $client['client']; ?></td></tr>
+		<tr><th style="width: 150px;">Клиент <img src="<?php echo $client['icon']; ?>"></th><td><?php echo nl2br($client['client']); ?></td></tr>
 		<tr><th>Град</th><td><?php echo $client['city']; ?></td></tr>
+		<tr><th>Адрес</th><td><?php echo nl2br($client['address']); ?></td></tr>
 		<tr><th>Email</th><td><?php echo $client['email']; ?></td></tr>
 		<tr><th>Телефон</th><td><?php echo $client['phone']; ?></td></tr>
 		<tr><th>Тема</th><td><?php echo $client['theme']; ?></td></tr>
