@@ -7,6 +7,7 @@
     <title>Clients</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
     <link rel="stylesheet" href="assets/main.css">
+    <link rel="stylesheet" href="assets/select2/select2.min.css">
 </head>
 <body>
 	<div class="container-fluid">
@@ -32,7 +33,15 @@
                     </div>
                     <div class="panel-body">
                     	<div id="map"></div>
+
                     </div>
+					<div class="panel-footer">
+						<button class="btn btn-success fitToAll">Позициониране на картата за всички маркери</button>
+						<a href="clients.php" target="_blank" class="btn btn-success">Таблица с клиенти</a>
+						<?php foreach(Pointers::$data as $image => $label) : ?>
+						<div style="margin-top: 10px;"><img style="width: 32px; height: 32px;" src="<?php echo $image; ?>" /> <?php echo $label; ?></div>
+						<?php endforeach; ?>
+					</div>
                 </div>
 			</div>
 			<div class="col-md-3">
@@ -63,7 +72,12 @@
     </div>
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
 	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-	<script src="https://maps.googleapis.com/maps/api/js?callback=initMap&language=bg" async defer></script>
+	<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC9EqmcyIe7QD5o5XrBEqKxxwS9tDlU11U&callback=initMap&language=bg" async defer></script>
+	<script src="assets/select2/select2.full.min.js"></script>
+	<script src="assets/select2/i18n/bg.js"></script>
+	<script>
+	var pointers = <?php echo json_encode(Pointers::$data); ?>;
+	</script>
 	<script src="assets/client.js"></script>
 </body>
 </html>

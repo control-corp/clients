@@ -27,22 +27,41 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $result['data'] = $view->render(__DIR__ . '/views/_add.php');
                     break;
                 case 'editClient' :
+
                     $client = db()->fetch('SELECT * FROM clients WHERE id = ' . (int) $post['id']);
+
                     if ($client) {
-                        $city = false;
-                        if ($post['cityId'] != $client['cityId']) {
+
+                        $lat = null;
+                        $lng = null;
+
+                        if ($post['cityId'] != $client['cityId'] || $post['address'] !== $client['address']) {
+
                             $city = db()->fetch('SELECT lat, lng FROM cities WHERE id = ' . (int) $post['cityId']);
+
+                            if ($city) {
+                                $coordinates = getLatLng($post['address'] . ', ' . $city['name'] . ', България');
+                                if (!isset($coordinates['error_message']) && !empty($coordinates['results'])) {
+                                    $lat = $coordinates['results'][0]['geometry']['location']['lat'];
+                                    $lng = $coordinates['results'][0]['geometry']['location']['lng'];
+                                } else {
+                                    $lat = $city['lat'] ? $city['lat'] : '42.66536841';
+                                    $lng = $city['lng'] ? $city['lng'] : '42.66536841';
+                                }
+                            }
                         }
+
                         db()->update('clients', array(
                             'client'  => $post['client'],
+                            'icon'    => $post['icon'],
                             'cityId'  => $post['cityId'],
                             'address' => $post['address'],
                             'email'   => $post['email'],
                             'phone'   => $post['phone'],
                             'theme'   => ($post['theme'] ? $post['theme'] : null),
                             'content' => ($post['content'] ? $post['content'] : null),
-                            'lat'     => ($city ? $city['lat'] : $client['lat']),
-                            'lng'     => ($city ? $city['lng'] : $client['lng']),
+                            'lat'     => $lat,
+                            'lng'     => $lng,
                         ), array('id' => $client['id']));
                     }
                     break;
@@ -63,7 +82,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 case 'getClients' :
                     $view = new View();
                     $view->clients  = db()->fetchAll('SELECT * FROM clients ORDER BY id DESC');
-                    $cities = db()->fetchPairs('SELECT id, name FROM cities');
+                    $cities = db()->fetchPairs('SELECT id, CONCAT(name, ", ", code) FROM cities');
                     foreach ($view->clients as $k => $v) {
                         $view->clients[$k]['city'] = isset($cities[$v['cityId']]) ? $cities[$v['cityId']] : '';
                     }
@@ -76,19 +95,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     db()->delete('clients', array('id' => (int) $post['id']));
                     break;
                 case 'add' :
-                    $city = db()->fetch('SELECT lat, lng FROM cities WHERE id = ' . (int) $post['cityId']);
+
+                    $city = db()->fetch('SELECT lat, lng, name FROM cities WHERE id = ' . (int) $post['cityId']);
+
+                    $lat = null;
+                    $lng = null;
+
+                    if ($city) {
+                        $coordinates = getLatLng($post['address'] . ', ' . $city['name'] . ', България');
+                        if (!isset($coordinates['error_message']) && !empty($coordinates['results'])) {
+                            $lat = $coordinates['results'][0]['geometry']['location']['lat'];
+                            $lng = $coordinates['results'][0]['geometry']['location']['lng'];
+                        } else {
+                            $lat = $city['lat'] ? $city['lat'] : '42.66536841';
+                            $lng = $city['lng'] ? $city['lng'] : '42.66536841';
+                        }
+                    }
+
                     db()->insert('clients', array(
                         'client'  => $post['client'],
+						'icon'    => $post['icon'],
                         'cityId'  => $post['cityId'],
                         'address' => $post['address'],
                         'email'   => $post['email'],
                         'phone'   => $post['phone'],
                         'theme'   => ($post['theme'] ? $post['theme'] : null),
                         'content' => ($post['content'] ? $post['content'] : null),
-                        'lat'     => ($city ? $city['lat'] : null),
-                        'lng'     => ($city ? $city['lng'] : null),
-                        'icon'    => 'http://maps.google.com/mapfiles/ms/icons/red-dot.png',
+                        'lat'     => $lat,
+                        'lng'     => $lng,
                     ));
+
                     break;
                 default:
                     throw new Exception('Invalid operation');

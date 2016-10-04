@@ -6,10 +6,15 @@ function initMap()
 {
 	map = new google.maps.Map(document.getElementById('map'), {
         center: {lat: 42.66536841838456, lng: 25.21921489374994},
-        zoom: 7
+        zoom: 7,
+		mapTypeId: google.maps.MapTypeId.HYBRID
     });
 
 	infoWindow = new google.maps.InfoWindow();
+	
+	google.maps.event.addListener(infoWindow, 'closeclick', function() {
+		$('.clientItem').css('background-color', 'inherit');
+	});
 }
 
 function addMarker(params)
@@ -18,38 +23,43 @@ function addMarker(params)
 		removeMarker(params.data.id);
 	}
 
+	var image = {
+		url:  params.data.icon,
+		// This marker is 20 pixels wide by 32 pixels high.
+		scaledSize: new google.maps.Size(32, 32)
+	};
+
 	var marker = new google.maps.Marker({
 		position: params.position,
 		map: map,
-		icon: params.data.icon,
+		icon: image,
 		draggable: (params.draggable || false),
 		data: params.data,
 		title: params.data.client
 	});
 	
 	marker.addListener('click', function (e) {
-		var iconUrls = {
-            'http://maps.google.com/mapfiles/ms/icons/red-dot.png': 'Червен',
-            'http://maps.google.com/mapfiles/ms/icons/blue-dot.png': 'Син',
-            'http://maps.google.com/mapfiles/ms/icons/green-dot.png': 'Зелен'
-		};
 		var icons = '<select class="form-control pull-left" onchange="updateIcon(' + this.data.id + ', this.value);" style="width: 100px; margin-left: 5px;">';
-		for (var i in iconUrls) {
-			icons += '<option' + (i == this.data.icon ? ' selected' : '') + ' value="' + i + '">' + iconUrls[i] + '</option>';
+		for (var i in pointers) {
+			icons += '<option' + (i == this.data.icon ? ' selected' : '') + ' value="' + i + '">' + pointers[i] + '</option>';
 		}
 		icons += '</select>';
-		var content = '<div style="width: 300px"><table class="client table table-bordered">' +
+		var content = '<div data-id="' + this.data.id + '" style="width: 300px"><table style="width: 100%; margin-bottom: 5px;" class="client table table-bordered">' +
 			'<tr><th style="width: 30%">Клиент</th><td>' + nl2br(this.data.client) + '</td></tr>' +
 			'<tr><th>Град</th><td>' + this.data.city + '</td></tr>' +
 			'<tr><th>Адрес</th><td>' + (this.data.address ? nl2br(this.data.address) : '') + '</td></tr>' +
 			'<tr><th>Email</th><td>' + this.data.email + '</td></tr>' +
 			'<tr><th>Телефон</th><td>' + this.data.phone + '</td></tr>' +
-			'<tr><th>Тема</th><td>' + (this.data.theme ? this.data.theme : '') + '</td></tr>' +
-			'<tr><th>Съобщение</th><td>' + (this.data.content ? nl2br(this.data.content) : '') + '</td></tr>' +
-			'<tr><td colspan="2"><button data-id="' + this.data.id + '" class="toggleDraggable btn btn-default pull-left">Drag ' + (this.getDraggable() ? 'ON' : 'OFF') + '</button>' + icons + '</td></tr>' +
-		'</table></div>';
+			'<tr><th>Описание</th><td>' + (this.data.theme ? this.data.theme : '') + '</td></tr>' +
+			'<tr><th>Бележки</th><td>' + (this.data.content ? nl2br(this.data.content) : '') + '</td></tr>' +
+			'<tr><td colspan="2" style="text-align: right"><a style="padding: 3px;" class="wayto" target="_blank" href="https://www.google.com/maps/dir/' + this.data.lat + ',' + this.data.lng + '?hl=bg">Упътване до тук</a></td></tr>' +
+		'</table>' + 
+		'<button data-id="' + this.data.id + '" class="toggleDraggable btn btn-default pull-left">Drag ' + (this.getDraggable() ? 'ON' : 'OFF') + '</button>' + icons
+		'</div>';
 		infoWindow.setContent(content);
 		infoWindow.open(map, this);
+		$('.clientItem').css('background-color', 'inherit');
+		$('.clientItem[data-id="' + this.data.id + '"]').css('background-color', '#f2f2f2');
 	});
 	
 	marker.addListener('dragend', function (e) {
@@ -85,6 +95,14 @@ function removeMarker(id)
 function updateLatLng(id, position)
 {
 	$.post('src/ajax.php', {op: 'updateLatLng', lat: position.lat(), lng: position.lng(), id: id}, function (result) {
+		if (markers[id]) {
+			markers[id].data.lat = position.lat();
+			markers[id].data.lng = position.lng();
+			var wayto = $('div[data-id="' + id + '"]').find('.wayto');
+			if (wayto.length) {
+				wayto.attr('href', 'https://www.google.com/maps/dir/' + position.lat() + ',' + position.lng() + '?hl=bg');
+			}
+		}
 		if (result.success === 0) {
 			alert(result.error);
 		}
@@ -173,6 +191,7 @@ $(function ()
 				alert(result.error);
 			} else {
 				$('#editClient .modal-body').html(result.data);
+				$('#editClient .select2').select2({language: 'bg', width: '100%'});
 				$('#editClient').modal({
 					keyboard: true
 				});
@@ -217,9 +236,25 @@ $(function ()
 		
 	});
 	
+	$('.fitToAll').on('click', function () {
+		var hasMarkers = 0;
+		var bounds = new google.maps.LatLngBounds();
+		for (var i in markers) {
+			bounds.extend(markers[i].getPosition());
+			hasMarkers = 1;
+		}
+		if (hasMarkers) {
+			map.fitBounds(bounds);
+			infoWindow.close();
+			$('.clientItem').css('background-color', 'inherit');
+		}
+	});
+	
 	$('.getClients').on('click', '.showClient', function () {
 		var id = $(this).attr('data-id');
 		if (markers[id]) {
+			map.setZoom(17);
+			map.setCenter(markers[id].getPosition());
 			new google.maps.event.trigger(markers[id], 'click');
 		}
 	});
@@ -245,7 +280,7 @@ $(function ()
 	});
 	
 	$('.addForm input[name="btnSave"]').on('click', function () {
-		
+
 		var error = 0;
 		var form  = $(this).closest('form');
 		
@@ -253,7 +288,7 @@ $(function ()
 		
 		form.find('input[type="text"], textarea, select').each(function () {
 			if ($(this).attr('required') && $.trim(this.value) === '') {
-				$(this).after('<span class="errors">Полето е задължително</span>');
+				$(this).closest('[class^="col-md-"]').append('<span class="errors">Полето е задължително</span>');
 				error = 1;
 			}
 		});
@@ -271,10 +306,14 @@ $(function ()
 				alert(result.error);
 			} else {
 				form[0].reset();
+				$('select[name="cityId"]').val('');
+				$('select[name="cityId"]').select2({language: 'bg'});
 				getClients();
 			}
 		}, 'json');
 		
 		return false;
 	});
+	
+	$('.select2').select2({language: 'bg'});
 });

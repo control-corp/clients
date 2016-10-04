@@ -7,8 +7,14 @@
 	</div>
 	<div class="form-group">
 		<div class="col-md-12">
+			<label>Маркер</label>
+			<select name="icon" class="form-control" required><?php echo build_options(Pointers::$data, value($this->item, 'icon', ''), 'Изберете'); ?></select>
+		</div>
+	</div>
+	<div class="form-group">
+		<div class="col-md-12">
 			<label>Град</label>
-			<select name="cityId" class="form-control" required><?php echo build_options(db()->fetchPairs('SELECT id, name FROM cities'), value($this->item, 'cityId', 0), 'Изберете'); ?></select>
+			<select name="cityId" class="form-control select2" required><?php echo build_options(db()->fetchPairs('SELECT id, CONCAT(name, ", ", code) FROM cities'), value($this->item, 'cityId', 0), 'Изберете'); ?></select>
 		</div>
 	</div>
 	<div class="form-group">
@@ -31,13 +37,13 @@
 	</div>
 	<div class="form-group">
 		<div class="col-md-12">
-			<label>Тема</label>
+			<label>Описание</label>
 			<input type="text" name="theme" class="form-control" value="<?php echo value($this->item, 'theme'); ?>" />
 		</div>
 	</div>
 	<div class="form-group">
 		<div class="col-md-12">
-			<label>Съобщение</label>
+			<label>Бележки</label>
 			<textarea rows="5" name="content" class="form-control"><?php echo value($this->item, 'content'); ?></textarea>
 		</div>
 	</div>
