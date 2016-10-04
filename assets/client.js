@@ -202,6 +202,8 @@ $(function ()
 	
 	$('#editClient').on('click', 'input[name="btnSave"]', function () {
 		
+		var that = $(this);
+		
 		var error = 0;
 		var form  = $(this).closest('form');
 
@@ -223,6 +225,7 @@ $(function ()
 		data.push({name: 'op', value: 'editClient'});
 		data.push({name: 'id', value: $(this).attr('data-id')});
 		
+		that.attr('disabled', true);
 		$.post('src/ajax.php', data, function (result) {
 			if (result.success === 0) {
 				alert(result.error);
@@ -230,6 +233,7 @@ $(function ()
 				getClients();
 				$('#editClient').modal('hide');
 			}
+			that.attr('disabled', false);
 		}, 'json');
 		
 		return false;
@@ -281,6 +285,8 @@ $(function ()
 	
 	$('.addForm input[name="btnSave"]').on('click', function () {
 
+		var that = $(this);
+
 		var error = 0;
 		var form  = $(this).closest('form');
 		
@@ -301,6 +307,8 @@ $(function ()
 		
 		data.push({name: 'op', value: 'add'});
 		
+		that.attr('disabled', true);
+		
 		$.post('src/ajax.php', data, function (result) {
 			if (result.success === 0) {
 				alert(result.error);
@@ -310,6 +318,7 @@ $(function ()
 				$('select[name="cityId"]').select2({language: 'bg'});
 				getClients();
 			}
+			that.attr('disabled', false);
 		}, 'json');
 		
 		return false;

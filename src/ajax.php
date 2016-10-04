@@ -32,12 +32,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                     if ($client) {
 
-                        $lat = null;
-                        $lng = null;
+                        $lat = $client['lat'];
+                        $lng = $client['lng'];
 
                         if ($post['cityId'] != $client['cityId'] || $post['address'] !== $client['address']) {
 
-                            $city = db()->fetch('SELECT lat, lng FROM cities WHERE id = ' . (int) $post['cityId']);
+                            $city = db()->fetch('SELECT lat, lng, name FROM cities WHERE id = ' . (int) $post['cityId']);
 
                             if ($city) {
                                 $coordinates = getLatLng($post['address'] . ', ' . $city['name'] . ', България');
